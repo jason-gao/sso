@@ -6,9 +6,7 @@
     "homepage": "https://github.com/jason-gao/sso",
     "authors": [
         {
-            "name": "jasong",
-            "email": "",
-            "homepage": ""
+            "name": "jasong"
         }
     ],
     "require": {
