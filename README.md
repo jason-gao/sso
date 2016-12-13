@@ -1,2 +1,2 @@
-+ source https://github.com/jasny/sso
++ source from https://github.com/jasny/sso
 
