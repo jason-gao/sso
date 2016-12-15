@@ -95,7 +95,7 @@ class Broker
         if (isset($this->token)) return;
 
         $this->token = base_convert(md5(uniqid(rand(), true)), 16, 36);
-        setcookie($this->getCookieName(), $this->token, time() + 3600, '/');
+        setcookie($this->getCookieName(), $this->token, time() + 3600, '/', '', false, true);
     }
 
     /**
