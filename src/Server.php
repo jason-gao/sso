@@ -304,10 +304,13 @@ abstract class Server
         $_SESSION[$key] = $value;
     }
 
+
     /**
-     * Get session data
-     *
-     * @param type $key
+     * @param $key
+     * @return null|string
+     * @node_name Get session data
+     * @link
+     * @desc
      */
     protected function getSessionData($key)
     {
@@ -317,16 +320,19 @@ abstract class Server
     }
 
 
+
     /**
-     * An error occured.
-     *
      * @param string $message
-     * @param int    $http_status
+     * @param int $http_status
+     * @throws \Exception
+     * @node_name An error occured.
+     * @link
+     * @desc
      */
     protected function fail($message, $http_status = 500)
     {
         if (!empty($this->options['fail_exception'])) {
-            throw new Exception($message, $http_status);
+            throw new \Exception($message, $http_status);
         }
 
         if ($http_status === 500) trigger_error($message, E_USER_WARNING);

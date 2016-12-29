@@ -41,6 +41,9 @@ class Broker
      */
     protected $userinfo;
 
+
+    protected $headers;
+
     /**
      * Class constructor
      *
@@ -144,6 +147,7 @@ class Broker
      */
     public function attach($returnUrl = null)
     {
+
         if ($this->isAttached()) return;
 
         if ($returnUrl === true) {
@@ -174,13 +178,17 @@ class Broker
         return $this->url . '?' . http_build_query($params);
     }
 
+
     /**
-     * Execute on SSO server.
-     *
-     * @param string       $method  HTTP method: 'GET', 'POST', 'DELETE'
+     * @param $method HTTP method: 'GET', 'POST', 'DELETE'
      * @param string       $command Command
      * @param array|string $data    Query or post parameters
-     * @return array|object
+     * @return array|mixed|null|object
+     * @throws Exception
+     * @throws NotAttachedException
+     * @node_name Execute on SSO server.
+     * @link
+     * @desc
      */
     protected function request($method, $command, $data = null)
     {
@@ -192,7 +200,8 @@ class Broker
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
+        $this->setRequestHeaders('Accept', 'application/json');
+        $this->set_request_headers($ch);
 
         if ($method === 'POST' && !empty($data)) {
             $post = is_string($data) ? $data : http_build_query($data);
@@ -223,6 +232,51 @@ class Broker
         return $data;
     }
 
+
+    /**
+     * @param $key
+     * @param $val
+     * @node_name 设置请求头
+     * @link
+     * @desc
+     */
+    protected function setRequestHeaders($key, $val){
+        $this->headers[$key] = $val;
+    }
+
+    /**
+     * @param $ch
+     * @node_name Formats and adds custom headers to the current request
+     * @link
+     * @desc
+     */
+    protected function set_request_headers($ch) {
+        $headers = array();
+        foreach ($this->headers as $key => $value) {
+            $headers[] = $key.': '.$value;
+        }
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    }
+
+    /**
+     * @param $ip
+     * @node_name 设置ip
+     * @link
+     * @desc
+     */
+    public function setRequestIp($ip){
+        $this->setRequestHeaders('X-CLIENT-IP', $ip);
+    }
+
+    /**
+     * @param $userAgent
+     * @node_name 设置user agent
+     * @link
+     * @desc
+     */
+    public function setRequestUserAgent($userAgent){
+        $this->setRequestHeaders('X-USER-AGENT', $userAgent);
+    }
 
     /**
      * Log the client in at the SSO server.
@@ -277,14 +331,9 @@ class Broker
      */
     public function __call($fn, $args)
     {
-        $sentence = strtolower(preg_replace('/([a-z0-9])([A-Z])/', '$1 $2', $fn));
-        $parts = explode(' ', $sentence);
+        $method = isset($args[0]['method'])?$args[0]['method']:'POST';
+        $res =  $this->request($method, $fn, $args[0]['data']);
 
-        $method = count($parts) > 1 && in_array(strtoupper($parts[0]), ['GET', 'DELETE'])
-            ? strtoupper(array_shift($parts))
-            : 'POST';
-        $command = join('-', $parts);
-
-        return $this->request($method, $command, $args);
+        return $res;
     }
 }
