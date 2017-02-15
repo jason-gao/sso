@@ -284,7 +284,6 @@ abstract class Server
         }
 
         header('Content-type: application/json; charset=UTF-8');
-        $this->noCache();
         echo json_encode($user);
     }
 
@@ -383,13 +382,6 @@ abstract class Server
      */
     abstract protected function getUserInfo($username);
 
-    protected function noCache(){
-        //防止ie缓存
-        header('Pragma: no-cache');
-        header('Cache-Control: no-cache');
-        header('Cache-Control: no-store');
-        header('Expires: -1');
-    }
 
 }
 
