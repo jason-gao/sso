@@ -41,8 +41,22 @@ class Broker
      */
     protected $userinfo;
 
-
+    /**
+     * curl http header
+     * @var array
+     */
     protected $headers;
+
+    /** curl http ssl options
+     * @var array
+     */
+    protected $sslOptions;
+
+    /**
+     * sso token 过期时间
+     * @var
+     */
+    protected $tokenExpire;
 
     /**
      * Class constructor
@@ -98,7 +112,7 @@ class Broker
         if (isset($this->token)) return;
 
         $this->token = base_convert(md5(uniqid(rand(), true)), 16, 36);
-        setcookie($this->getCookieName(), $this->token, time() + 3600, '/', '', false, true);
+        setcookie($this->getCookieName(), $this->token, time() + $this->getSsoTokenExpire(), '/', '', false, true);
     }
 
     /**
@@ -108,6 +122,28 @@ class Broker
     {
         setcookie($this->getCookieName(), null, 1, '/');
         $this->token = null;
+    }
+
+    /**
+     * @param $expire
+     * @node_name 设置sso token 过期时间,单位[s]
+     * @link
+     * @desc
+     */
+    public function setSsoTokenExpire($expire){
+        if($expire && $expire > 0){
+            $this->tokenExpire = $expire;
+        }
+    }
+
+    /**
+     * @return int
+     * @node_name tokenExpire 默认72000
+     * @link
+     * @desc
+     */
+    protected function getSsoTokenExpire(){
+        return $this->tokenExpire?(int)$this->tokenExpire:72000;
     }
 
     /**
@@ -202,6 +238,7 @@ class Broker
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         $this->setRequestHeaders('Accept', 'application/json');
         $this->set_request_headers($ch);
+        $this->setSsl($ch);
 
         if ($method === 'POST' && !empty($data)) {
             $post = is_string($data) ? $data : http_build_query($data);
@@ -277,6 +314,52 @@ class Broker
     public function setRequestUserAgent($userAgent){
         $this->setRequestHeaders('X-USER-AGENT', $userAgent);
     }
+
+    /**
+     * @param $caInfo
+     * @param int $verifyHost
+     * @param bool|true $verifyPeer
+     * @node_name 设置ssl证书options
+     * @link
+     * @desc
+     */
+    public function setSslOptions($caInfo, $verifyHost = 2, $verifyPeer = true){
+        $options = [
+            CURLOPT_SSL_VERIFYHOST => $verifyHost,
+            CURLOPT_SSL_VERIFYPEER => $verifyPeer,
+            CURLOPT_CAINFO => $caInfo,
+        ];
+
+        $this->sslOptions = $options;
+    }
+
+
+    /**
+     * @node_name 不使用ssl证书
+     * @link
+     * @desc
+     */
+    public function setNoSslOptions(){
+        $options = [
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+        ];
+
+        $this->sslOptions = $options;
+    }
+
+    /**
+     * @param $ch
+     * @node_name ssl
+     * @link
+     * @desc
+     */
+    protected function setSsl($ch){
+        if($this->sslOptions){
+            curl_setopt_array($ch, $this->sslOptions);
+        }
+    }
+
 
     /**
      * Log the client in at the SSO server.
