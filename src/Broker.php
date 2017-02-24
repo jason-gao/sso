@@ -138,12 +138,12 @@ class Broker
 
     /**
      * @return int
-     * @node_name tokenExpire 默认72000
+     * @node_name tokenExpire 默认7200
      * @link
      * @desc
      */
     protected function getSsoTokenExpire(){
-        return $this->tokenExpire?(int)$this->tokenExpire:72000;
+        return $this->tokenExpire?(int)$this->tokenExpire:7200;
     }
 
     /**
