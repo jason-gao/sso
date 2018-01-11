@@ -1,4 +1,5 @@
 <?php
+
 namespace Jasny\SSO;
 
 use Jasny\ValidationResult;
@@ -59,21 +60,32 @@ class Broker
     protected $tokenExpire;
 
     /**
+     * Url of request sso server ,if set
+     * @var
+     */
+    protected $requestUrl;
+
+    /**
      * Class constructor
      *
-     * @param string $url    Url of SSO server
+     * @param string $url Url of SSO server
      * @param string $broker My identifier, given by SSO provider.
      * @param string $secret My secret word, given by SSO provider.
+     * @param string $requestUrl Url of request sso server ,if set
      */
-    public function __construct($url, $broker, $secret)
+    public function __construct($url, $broker, $secret, $requestUrl = '')
     {
         if (!$url) throw new \InvalidArgumentException("SSO server URL not specified");
         if (!$broker) throw new \InvalidArgumentException("SSO broker id not specified");
         if (!$secret) throw new \InvalidArgumentException("SSO broker secret not specified");
 
-        $this->url = $url;
+        $this->url    = $url;
         $this->broker = $broker;
         $this->secret = $secret;
+
+        if ($requestUrl) {
+            $this->requestUrl = $requestUrl;
+        }
 
         if (isset($_COOKIE[$this->getCookieName()])) $this->token = $_COOKIE[$this->getCookieName()];
     }
@@ -130,8 +142,9 @@ class Broker
      * @link
      * @desc
      */
-    public function setSsoTokenExpire($expire){
-        if($expire && $expire > 0){
+    public function setSsoTokenExpire($expire)
+    {
+        if ($expire && $expire > 0) {
             $this->tokenExpire = $expire;
         }
     }
@@ -142,8 +155,9 @@ class Broker
      * @link
      * @desc
      */
-    protected function getSsoTokenExpire(){
-        return $this->tokenExpire?(int)$this->tokenExpire:7200;
+    protected function getSsoTokenExpire()
+    {
+        return $this->tokenExpire ? (int)$this->tokenExpire : 7200;
     }
 
     /**
@@ -167,11 +181,11 @@ class Broker
         $this->generateToken();
 
         $data = [
-            'command' => 'attach',
-            'broker' => $this->broker,
-            'token' => $this->token,
-            'checksum' => hash('sha256', 'attach' . $this->token . $this->secret)
-        ] + $_GET;
+                'command'  => 'attach',
+                'broker'   => $this->broker,
+                'token'    => $this->token,
+                'checksum' => hash('sha256', 'attach' . $this->token . $this->secret)
+            ] + $_GET;
 
         return $this->url . "?" . http_build_query($data + $params);
     }
@@ -179,7 +193,7 @@ class Broker
     /**
      * Attach our session to the user's session on the SSO server.
      *
-     * @param string|true $returnUrl  The URL the client should be returned to after attaching
+     * @param string|true $returnUrl The URL the client should be returned to after attaching
      */
     public function attach($returnUrl = null)
     {
@@ -187,12 +201,12 @@ class Broker
         if ($this->isAttached()) return;
 
         if ($returnUrl === true) {
-            $protocol = !empty($_SERVER['HTTPS']) ? 'https://' : 'http://';
+            $protocol  = !empty($_SERVER['HTTPS']) ? 'https://' : 'http://';
             $returnUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         }
 
         $params = ['return_url' => $returnUrl];
-        $url = $this->getAttachUrl($params);
+        $url    = $this->getAttachUrl($params);
 
         header("Location: $url", true, 307);
         echo "You're redirected to <a href='$url'>$url</a>";
@@ -203,22 +217,23 @@ class Broker
      * Get the request url for a command
      *
      * @param string $command
-     * @param array  $params   Query parameters
+     * @param array $params Query parameters
      * @return string
      */
     protected function getRequestUrl($command, $params = [])
     {
-        $params['command'] = $command;
+        $params['command']     = $command;
         $params['sso_session'] = $this->getSessionId();
 
-        return $this->url . '?' . http_build_query($params);
+        $requestUrl = $this->requestUrl ? $this->requestUrl : $this->url;
+        return $requestUrl . '?' . http_build_query($params);
     }
 
 
     /**
      * @param $method HTTP method: 'GET', 'POST', 'DELETE'
-     * @param string       $command Command
-     * @param array|string $data    Query or post parameters
+     * @param string $command Command
+     * @param array|string $data Query or post parameters
      * @return array|mixed|null|object
      * @throws Exception
      * @throws NotAttachedException
@@ -277,7 +292,8 @@ class Broker
      * @link
      * @desc
      */
-    protected function setRequestHeaders($key, $val){
+    protected function setRequestHeaders($key, $val)
+    {
         $this->headers[$key] = $val;
     }
 
@@ -287,10 +303,11 @@ class Broker
      * @link
      * @desc
      */
-    protected function set_request_headers($ch) {
+    protected function set_request_headers($ch)
+    {
         $headers = array();
         foreach ($this->headers as $key => $value) {
-            $headers[] = $key.': '.$value;
+            $headers[] = $key . ': ' . $value;
         }
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     }
@@ -301,7 +318,8 @@ class Broker
      * @link
      * @desc
      */
-    public function setRequestIp($ip){
+    public function setRequestIp($ip)
+    {
         $this->setRequestHeaders('X-CLIENT-IP', $ip);
     }
 
@@ -311,7 +329,8 @@ class Broker
      * @link
      * @desc
      */
-    public function setRequestUserAgent($userAgent){
+    public function setRequestUserAgent($userAgent)
+    {
         $this->setRequestHeaders('X-USER-AGENT', $userAgent);
     }
 
@@ -323,11 +342,12 @@ class Broker
      * @link
      * @desc
      */
-    public function setSslOptions($caInfo, $verifyHost = 2, $verifyPeer = true){
+    public function setSslOptions($caInfo, $verifyHost = 2, $verifyPeer = true)
+    {
         $options = [
             CURLOPT_SSL_VERIFYHOST => $verifyHost,
             CURLOPT_SSL_VERIFYPEER => $verifyPeer,
-            CURLOPT_CAINFO => $caInfo,
+            CURLOPT_CAINFO         => $caInfo,
         ];
 
         $this->sslOptions = $options;
@@ -339,7 +359,8 @@ class Broker
      * @link
      * @desc
      */
-    public function setNoSslOptions(){
+    public function setNoSslOptions()
+    {
         $options = [
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
@@ -354,8 +375,9 @@ class Broker
      * @link
      * @desc
      */
-    protected function setSsl($ch){
-        if($this->sslOptions){
+    protected function setSsl($ch)
+    {
+        if ($this->sslOptions) {
             curl_setopt_array($ch, $this->sslOptions);
         }
     }
@@ -377,7 +399,7 @@ class Broker
         if (!isset($username) && isset($_POST['username'])) $username = $_POST['username'];
         if (!isset($password) && isset($_POST['password'])) $password = $_POST['password'];
 
-        $result = $this->request('POST', 'login', compact('username', 'password'));
+        $result         = $this->request('POST', 'login', compact('username', 'password'));
         $this->userinfo = $result;
 
         return $this->userinfo;
@@ -409,13 +431,13 @@ class Broker
      * Magic method to do arbitrary request
      *
      * @param string $fn
-     * @param array  $args
+     * @param array $args
      * @return mixed
      */
     public function __call($fn, $args)
     {
-        $method = isset($args[0]['method'])?$args[0]['method']:'POST';
-        $res =  $this->request($method, $fn, $args[0]['data']);
+        $method = isset($args[0]['method']) ? $args[0]['method'] : 'POST';
+        $res    = $this->request($method, $fn, $args[0]['data']);
 
         return $res;
     }
