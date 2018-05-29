@@ -396,10 +396,14 @@ class Broker
      */
     public function login($username = null, $password = null)
     {
-        if (!isset($username) && isset($_POST['username'])) $username = $_POST['username'];
-        if (!isset($password) && isset($_POST['password'])) $password = $_POST['password'];
+        if(isset($username)){
+            $_POST['username'] = $username;
+        }
+        if(isset($password)){
+            $_POST['password'] = $password;
+        }
 
-        $result         = $this->request('POST', 'login', compact('username', 'password'));
+        $result         = $this->request('POST', 'login', $_POST);
         $this->userinfo = $result;
 
         return $this->userinfo;
