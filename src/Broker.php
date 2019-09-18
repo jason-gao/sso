@@ -292,7 +292,7 @@ class Broker
      * @link
      * @desc
      */
-    protected function setRequestHeaders($key, $val)
+    public function setRequestHeaders($key, $val)
     {
         $this->headers[$key] = $val;
     }
