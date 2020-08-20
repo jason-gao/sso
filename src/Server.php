@@ -293,7 +293,7 @@ abstract class Server
 	    //new style response
 	    if(isset($_REQUEST['sso_version']) && $_REQUEST['sso_version'] == 2){
 		    Response::setCodeConf(Conf::$codeConf);
-		    Response::responseApi(1, $user);
+		    Response::responseApi(1, $user, [], '', 'json', 0, 0);
 	    }
 
         header('Content-type: application/json; charset=UTF-8');
