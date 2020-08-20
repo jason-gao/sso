@@ -3,6 +3,7 @@ namespace Jasny\SSO;
 
 use Desarrolla2\Cache\Cache;
 use Desarrolla2\Cache\Adapter;
+use Response\Response;
 
 /**
  * Single sign-on server.
@@ -264,6 +265,12 @@ abstract class Server
         $this->startBrokerSession();
         $this->setSessionData('sso_user', null);
 
+	    //new style response
+	    if(isset($_REQUEST['sso_version']) && $_REQUEST['sso_version'] == 2){
+		    Response::setCodeConf(Conf::$codeConf);
+		    Response::responseApi(1, []);
+	    }
+
         header('Content-type: application/json; charset=UTF-8');
         http_response_code(204);
     }
@@ -282,6 +289,12 @@ abstract class Server
             $user = $this->getUserInfo($username);
             if (!$user) return $this->fail("User not found", 500); // Shouldn't happen
         }
+
+	    //new style response
+	    if(isset($_REQUEST['sso_version']) && $_REQUEST['sso_version'] == 2){
+		    Response::setCodeConf(Conf::$codeConf);
+		    Response::responseApi(1, $user);
+	    }
 
         header('Content-type: application/json; charset=UTF-8');
         echo json_encode($user);
@@ -331,6 +344,16 @@ abstract class Server
      */
     protected function fail($message, $http_status = 500)
     {
+    	//new style response
+    	if(isset($_REQUEST['sso_version']) && $_REQUEST['sso_version'] == 2){
+    		$code = 0;
+    		if($http_status == 403){
+    			$code =  100403;
+		    }
+    		Response::setCodeConf(Conf::$codeConf);
+    		Response::responseApi($code, [], [$message]);
+	    }
+
         if (!empty($this->options['fail_exception'])) {
             throw new \Exception($message, $http_status);
         }
