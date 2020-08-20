@@ -243,45 +243,67 @@ class Broker
      */
     protected function request($method, $command, $data = null)
     {
-        if (!$this->isAttached()) {
-            throw new NotAttachedException('No token');
-        }
-        $url = $this->getRequestUrl($command, !$data || $method === 'POST' ? [] : $data);
+	    try {
+		    if ( ! $this->isAttached() ) {
+			    throw new NotAttachedException( 'No token' );
+		    }
+		    $url = $this->getRequestUrl( $command, ! $data || $method === 'POST' ? [] : $data );
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-        $this->setRequestHeaders('Accept', 'application/json');
-        $this->set_request_headers($ch);
-        $this->setSsl($ch);
+		    $ch = curl_init( $url );
+		    curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		    curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $method );
+		    $this->setRequestHeaders( 'Accept', 'application/json' );
+		    $this->set_request_headers( $ch );
+		    $this->setSsl( $ch );
 
-        if ($method === 'POST' && !empty($data)) {
-            $post = is_string($data) ? $data : http_build_query($data);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
-        }
+		    if ( $method === 'POST' && ! empty( $data ) ) {
+			    $post = is_string( $data ) ? $data : http_build_query( $data );
+			    curl_setopt( $ch, CURLOPT_POSTFIELDS, $post );
+		    }
 
-        $response = curl_exec($ch);
-        if (curl_errno($ch) != 0) {
-            $message = 'Server request failed: ' . curl_error($ch);
-            throw new Exception($message);
-        }
+		    $response = curl_exec( $ch );
+		    if ( curl_errno( $ch ) != 0 ) {
+			    $message = 'Server request failed: ' . curl_error( $ch );
+			    throw new Exception( $message );
+		    }
 
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        list($contentType) = explode(';', curl_getinfo($ch, CURLINFO_CONTENT_TYPE));
+		    $httpCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+		    list( $contentType ) = explode( ';', curl_getinfo( $ch, CURLINFO_CONTENT_TYPE ) );
 
-        if ($contentType != 'application/json') {
-            $message = 'Expected application/json response, got ' . $contentType;
-            throw new Exception($message);
-        }
+		    if ( $contentType != 'application/json' ) {
+			    $message = 'Expected application/json response, got ' . $contentType;
+			    throw new Exception( $message );
+		    }
 
-        $data = json_decode($response, true);
-        if ($httpCode == 403) {
-            $this->clearToken();
-            throw new NotAttachedException($data['error'] ?: $response, $httpCode);
-        }
-        if ($httpCode >= 400) throw new Exception($data['error'] ?: $response, $httpCode);
+		    $data = json_decode( $response, true );
+		    //new style response
+		    if ( isset( $data['status']['code'] ) && $data['status']['code'] == 100403 ) {
+			    $this->clearToken();
+		    }
 
-        return $data;
+		    if ( $httpCode == 403 ) {
+			    $this->clearToken();
+			    throw new NotAttachedException( $data['error'] ?: $response, $httpCode );
+		    }
+		    if ( $httpCode >= 400 ) {
+			    throw new Exception( $data['error'] ?: $response, $httpCode );
+		    }
+	    } catch ( Exception $e ) {
+		    $data = [];
+		    //new style response
+		    if ( isset( $_REQUEST['sso_version'] ) && $_REQUEST['sso_version'] == 2 ) {
+			    $data = [
+				    'status' => [
+					    'code'      => 0,
+					    'message'   => $e->getMessage(),
+					    'create_at' => date( 'Y-m-d H:i:s' )
+				    ],
+				    'data'   => []
+			    ];
+		    }
+	    }
+
+	    return $data;
     }
 
 
