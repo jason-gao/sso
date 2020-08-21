@@ -266,7 +266,7 @@ abstract class Server
         $this->setSessionData('sso_user', null);
 
 	    //new style response
-	    if(isset($_REQUEST['sso_version']) && $_REQUEST['sso_version'] == 2){
+	    if(Response::isSSOVersion2()){
 		    Response::setCodeConf(Conf::$codeConf);
 		    Response::responseApi(1, []);
 	    }
@@ -291,7 +291,7 @@ abstract class Server
         }
 
 	    //new style response
-	    if(isset($_REQUEST['sso_version']) && $_REQUEST['sso_version'] == 2){
+	    if(Response::isSSOVersion2()){
 		    Response::setCodeConf(Conf::$codeConf);
 		    Response::responseApi(1, $user, [], '', 'json', 0, 0);
 	    }
@@ -345,7 +345,7 @@ abstract class Server
     protected function fail($message, $http_status = 500)
     {
     	//new style response
-    	if(isset($_REQUEST['sso_version']) && $_REQUEST['sso_version'] == 2){
+    	if(Response::isSSOVersion2()){
     		$code = 0;
     		if($http_status == 403){
     			$code =  100403;

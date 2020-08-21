@@ -3,6 +3,7 @@
 namespace Jasny\SSO;
 
 use Jasny\ValidationResult;
+use Response\Response;
 
 /**
  * Single sign-on broker.
@@ -277,7 +278,7 @@ class Broker
 
 		    $data = json_decode( $response, true );
 		    //new style response
-		    if ( isset( $data['status']['code'] ) && $data['status']['code'] == 100403 ) {
+		    if ( Response::isSSOVersion2() && isset( $data['status']['code'] ) && $data['status']['code'] == 100403 ) {
 			    $this->clearToken();
 		    }
 
@@ -291,7 +292,7 @@ class Broker
 	    } catch ( Exception $e ) {
 		    $data = [];
 		    //new style response
-		    if ( isset( $_REQUEST['sso_version'] ) && $_REQUEST['sso_version'] == 2 ) {
+		    if ( Response::isSSOVersion2()) {
 			    $data = [
 				    'status' => [
 					    'code'      => 0,
