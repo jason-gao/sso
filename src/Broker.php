@@ -290,17 +290,11 @@ class Broker
 			    throw new Exception( $data['error'] ?: $response, $httpCode );
 		    }
 	    } catch ( Exception $e ) {
-		    $data = [];
 		    //new style response
 		    if ( Response::isSSOVersion2()) {
-			    $data = [
-				    'status' => [
-					    'code'      => 0,
-					    'message'   => $e->getMessage(),
-					    'create_at' => date( 'Y-m-d H:i:s' )
-				    ],
-				    'data'   => []
-			    ];
+			    return $data;
+		    }else{
+		    	throw $e;
 		    }
 	    }
 
