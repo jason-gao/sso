@@ -442,7 +442,7 @@ class Broker
     public function getUserInfo()
     {
         if (!isset($this->userinfo)) {
-            $this->userinfo = $this->request('GET', 'userInfo');
+            $this->userinfo = $this->request('GET', 'userInfo', $_GET);
         }
 
         return $this->userinfo;
