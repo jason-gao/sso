@@ -294,10 +294,10 @@ abstract class Server
 	    if(Response::isSSOVersion2()){
 		    Response::setCodeConf(Conf::$codeConf);
 		    Response::responseApi(1, $user, [], '', 'json', 0, 0);
+	    }else{
+		    header('Content-type: application/json; charset=UTF-8');
+		    echo json_encode($user);
 	    }
-
-        header('Content-type: application/json; charset=UTF-8');
-        echo json_encode($user);
     }
 
 
