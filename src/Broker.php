@@ -238,6 +238,7 @@ class Broker
      * @return array|mixed|null|object
      * @throws Exception
      * @throws NotAttachedException
+     * @throws \Response\Exceptions\ResponseException
      * @node_name Execute on SSO server.
      * @link
      * @desc
@@ -246,7 +247,7 @@ class Broker
     {
 	    try {
 		    if ( ! $this->isAttached() ) {
-			    throw new NotAttachedException( 'No token' );
+			    throw new NotAttachedException( 'No token');
 		    }
 		    $url = $this->getRequestUrl( $command, ! $data || $method === 'POST' ? [] : $data );
 
@@ -276,29 +277,35 @@ class Broker
 			    throw new Exception( $message );
 		    }
 
-		    $data = json_decode( $response, true );
+		    $responseDecode = json_decode( $response, true );
 		    //new style response
-		    if ( Response::isSSOVersion2() && isset( $data['status']['code'] ) && $data['status']['code'] == 100403 ) {
+		    if ( Response::isSSOVersion2() && isset( $responseDecode['status']['code'] ) && $responseDecode['status']['code'] ==  Conf::NO_TOKEN_CODE) {
 			    $this->clearToken();
 		    }
 
 		    if ( $httpCode == 403 ) {
 			    $this->clearToken();
-			    throw new NotAttachedException( $data['error'] ?: $response, $httpCode );
+			    throw new NotAttachedException( $responseDecode['error'] ?: $response, $httpCode );
 		    }
 		    if ( $httpCode >= 400 ) {
-			    throw new Exception( $data['error'] ?: $response, $httpCode );
+			    throw new Exception( $responseDecode['error'] ?: $response, $httpCode );
 		    }
 	    } catch ( Exception $e ) {
 		    //new style response
 		    if ( Response::isSSOVersion2()) {
-			    return $data;
+			    if($e instanceof NotAttachedException){
+				    $responseDecode = Response::responseApi(Conf::NO_TOKEN_CODE, [], [], '', 'json',  0, 1, 'js', 1);
+			    }else{
+				    $responseDecode = Response::responseApi(0, [], [], '', 'json',  0, 1, 'js', 1);
+
+			    }
+			    return $responseDecode;
 		    }else{
-		    	throw $e;
+			    throw $e;
 		    }
 	    }
 
-	    return $data;
+	    return $responseDecode;
     }
 
 
