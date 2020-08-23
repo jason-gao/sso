@@ -247,7 +247,7 @@ class Broker
     {
 	    try {
 		    if ( ! $this->isAttached() ) {
-			    throw new NotAttachedException( 'No token');
+			    throw new NotAttachedException( 'No token' );
 		    }
 		    $url = $this->getRequestUrl( $command, ! $data || $method === 'POST' ? [] : $data );
 
@@ -279,7 +279,7 @@ class Broker
 
 		    $responseDecode = json_decode( $response, true );
 		    //new style response
-		    if ( Response::isSSOVersion2() && isset( $responseDecode['status']['code'] ) && $responseDecode['status']['code'] ==  Conf::NO_TOKEN_CODE) {
+		    if ( Response::isSSOVersion2() && isset( $responseDecode['status']['code'] ) && $responseDecode['status']['code'] == Conf::NO_TOKEN_CODE ) {
 			    $this->clearToken();
 		    }
 
@@ -292,15 +292,16 @@ class Broker
 		    }
 	    } catch ( Exception $e ) {
 		    //new style response
-		    if ( Response::isSSOVersion2()) {
-			    if($e instanceof NotAttachedException){
-				    $responseDecode = Response::responseApi(Conf::NO_TOKEN_CODE, [], [], '', 'json',  0, 1, 'js', 1);
-			    }else{
-				    $responseDecode = Response::responseApi(0, [], [], '', 'json',  0, 1, 'js', 1);
-
+		    if ( Response::isSSOVersion2() ) {
+			    Response::setCodeConf( Conf::$codeConf );
+			    if ( $e instanceof NotAttachedException ) {
+				    $responseDecode = Response::responseApi( Conf::NO_TOKEN_CODE, [], [], '', 'json', 0, 1, 'js', 1 );
+			    } else {
+				    $responseDecode = Response::responseApi( 0, [], [], '', 'json', 0, 1, 'js', 1 );
 			    }
+
 			    return $responseDecode;
-		    }else{
+		    } else {
 			    throw $e;
 		    }
 	    }
