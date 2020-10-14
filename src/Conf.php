@@ -8,9 +8,12 @@ class Conf {
 		1      => "ok",
 		0      => "fail: %s",
 		100403 => "No token",
+		16149  => 'session expired'
+
 	];
 
 	const NO_TOKEN_CODE = 100403;
+	const CODE_SESSION_EXPIRE = 16149;
 
 
 }

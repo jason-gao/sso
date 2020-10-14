@@ -293,8 +293,8 @@ abstract class Server
 	    //new style response
 	    if(Response::isSSOVersion2()){
 		    Response::setCodeConf(Conf::$codeConf);
-		    $code = $user ? 1 : 0;
-		    Response::responseApi($code, $user, [], '', 'json', 0, 0);
+		    $code = $user ? 1 : Conf::CODE_SESSION_EXPIRE;
+		    Response::responseApi($code, $user?$user:[], [], '', 'json', 0, 0);
 	    }else{
 		    header('Content-type: application/json; charset=UTF-8');
 		    echo json_encode($user);
