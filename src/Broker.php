@@ -297,7 +297,7 @@ class Broker
 			    if ( $e instanceof NotAttachedException ) {
 				    $responseDecode = Response::responseApi( Conf::NO_TOKEN_CODE, [], [], '', 'json', 0, 1, 'js', 1 );
 			    } else {
-				    $responseDecode = Response::responseApi( 0, [], [], '', 'json', 0, 1, 'js', 1 );
+				    $responseDecode = Response::responseApi( 0, [], [$e->getMessage()], '', 'json', 0, 1, 'js', 1 );
 			    }
 
 			    return $responseDecode;
