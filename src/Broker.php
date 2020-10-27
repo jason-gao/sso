@@ -419,28 +419,28 @@ class Broker
      * @return array  user info
      * @throws Exception if login fails eg due to incorrect credentials
      */
-    public function login($username = null, $password = null)
-    {
-        if(isset($username)){
-            $_POST['username'] = $username;
-        }
-        if(isset($password)){
-            $_POST['password'] = $password;
-        }
-
-        $result         = $this->request('POST', 'login', $_POST);
-        $this->userinfo = $result;
-
-        return $this->userinfo;
-    }
-
-    /**
-     * Logout at sso server.
-     */
-    public function logout()
-    {
-	    return $this->request('POST', 'logout', $_REQUEST);
-    }
+//    public function login($username = null, $password = null)
+//    {
+//        if(isset($username)){
+//            $_POST['username'] = $username;
+//        }
+//        if(isset($password)){
+//            $_POST['password'] = $password;
+//        }
+//
+//        $result         = $this->request('POST', 'login', $_POST);
+//        $this->userinfo = $result;
+//
+//        return $this->userinfo;
+//    }
+//
+//    /**
+//     * Logout at sso server.
+//     */
+//    public function logout()
+//    {
+//	    return $this->request('POST', 'logout', $_REQUEST);
+//    }
 
     /**
      * Get user information.
