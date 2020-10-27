@@ -6,7 +6,7 @@ class Conf {
 
 	public static $codeConf = [
 		1      => "ok",
-		0      => "fail: %s",
+		0      => "%s",
 		100403 => "No token",
 		16149  => 'session expired'
 
