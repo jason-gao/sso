@@ -13,7 +13,7 @@
         "php": ">=5.5.0",
         "desarrolla2/cache": "^2.0.0",
         "jasny/validation-result": "^1.0.0",
-        "jason-gao/php-rest-response": "v1.0.2"
+        "jason-gao/php-rest-response": "v1.0.3"
     },
     "require-dev": {
         "codeception/codeception": "^2.1.0",
