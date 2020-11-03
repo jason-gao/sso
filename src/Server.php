@@ -209,13 +209,18 @@ abstract class Server
         }
 
         if ($this->returnType === 'json') {
-            header('Content-type: application/json; charset=UTF-8');
+	        if ( ! headers_sent() ) {
+		        header( 'Content-Type:application/json; charset=utf-8' );
+	        }
             echo json_encode(['success' => 'attached']);
         }
 
         if ($this->returnType === 'jsonp') {
             $data = json_encode(['success' => 'attached']);
-            echo $_REQUEST['callback'] . "($data, 200);";
+	        if ( ! headers_sent() ) {
+		        header( 'Content-Type:application/json; charset=utf-8' );
+	        }
+            echo htmlspecialchars($_REQUEST['callback']) . "($data, 200);";
         }
 
         if ($this->returnType === 'redirect') {
@@ -237,43 +242,6 @@ abstract class Server
     }
 
 
-    /**
-     * Authenticate
-     */
-//    public function login()
-//    {
-//        $this->startBrokerSession();
-//
-//        if (empty($_POST['username'])) $this->fail("No username specified", 400);
-//        if (empty($_POST['password'])) $this->fail("No password specified", 400);
-//
-//        $validation = $this->authenticate($_POST['username'], $_POST['password'], $_POST);
-//
-//        if ($validation->failed()) {
-//            return $this->fail($validation->getError(), 400);
-//        }
-//
-//        $this->setSessionData('sso_user', $_POST['username']);
-//        $this->userInfo();
-//    }
-//
-//    /**
-//     * Log out
-//     */
-//    public function logout()
-//    {
-//        $this->startBrokerSession();
-//        $this->setSessionData('sso_user', null);
-//
-//	    //new style response
-//	    if(Response::isSSOVersion2()){
-//		    Response::setCodeConf(Conf::$codeConf);
-//		    Response::responseApi(1, []);
-//	    }
-//
-//        header('Content-type: application/json; charset=UTF-8');
-//        http_response_code(204);
-//    }
 
     /**
      * Ouput user information as json.

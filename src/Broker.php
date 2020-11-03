@@ -408,39 +408,7 @@ class Broker
     }
 
 
-    /**
-     * Log the client in at the SSO server.
-     *
-     * Only brokers marked trused can collect and send the user's credentials. Other brokers should omit $username and
-     * $password.
-     *
-     * @param string $username
-     * @param string $password
-     * @return array  user info
-     * @throws Exception if login fails eg due to incorrect credentials
-     */
-//    public function login($username = null, $password = null)
-//    {
-//        if(isset($username)){
-//            $_POST['username'] = $username;
-//        }
-//        if(isset($password)){
-//            $_POST['password'] = $password;
-//        }
-//
-//        $result         = $this->request('POST', 'login', $_POST);
-//        $this->userinfo = $result;
-//
-//        return $this->userinfo;
-//    }
-//
-//    /**
-//     * Logout at sso server.
-//     */
-//    public function logout()
-//    {
-//	    return $this->request('POST', 'logout', $_REQUEST);
-//    }
+
 
     /**
      * Get user information.
