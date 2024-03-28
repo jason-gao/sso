@@ -125,7 +125,8 @@ class Broker
         if (isset($this->token)) return;
 
         $this->token = base_convert(md5(uniqid(rand(), true)), 16, 36);
-        setcookie($this->getCookieName(), $this->token, time() + $this->getSsoTokenExpire(), '/', '', false, true);
+	    $secure_connection = isset($_SERVER['HTTP_X_SCHEME']) && $_SERVER['HTTP_X_SCHEME'] === 'https';
+	    setcookie($this->getCookieName(), $this->token, time() + $this->getSsoTokenExpire(), '/', '', $secure_connection, true);
     }
 
     /**
