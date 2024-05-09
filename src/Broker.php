@@ -134,7 +134,8 @@ class Broker
      */
     public function clearToken()
     {
-        setcookie($this->getCookieName(), null, 1, '/');
+        $secure_connection = isset($_SERVER['HTTP_X_SCHEME']) && $_SERVER['HTTP_X_SCHEME'] === 'https';
+        setcookie($this->getCookieName(), null, 1, '/', '', $secure_connection);
         $this->token = null;
     }
 
